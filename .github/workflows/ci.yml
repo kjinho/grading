@@ -8,9 +8,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macOS-latest", "windows-latest"]
+        os: ["ubuntu-latest", "windows-latest"]
         racket-version: ["stable", "current"]
-        racket-variant: ["CS"]
+        racket-variant: ["BC", "CS"]
         include:
           - racket-version: current
             experimental: true
