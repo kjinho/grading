@@ -10,7 +10,7 @@ jobs:
       matrix:
         os: ["ubuntu-latest", "macOS-latest", "windows-latest"]
         racket-version: ["stable", "current"]
-        racket-variant: ["BC", "CS"]
+        racket-variant: ["CS"]
         include:
           - racket-version: current
             experimental: true
