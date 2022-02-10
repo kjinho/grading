@@ -1,7 +1,10 @@
 #lang info
 (define collection "grading")
 (define deps '("base" "yaml" "threading-lib"))
-(define build-deps '("scribble-lib" "racket-doc" "rackunit-lib"))
+(define build-deps '("scribble-lib"
+                     "racket-doc"
+                     "rackunit-lib"
+                     "math-lib"))
 (define scribblings '(("scribblings/grading.scrbl" ())))
 (define pkg-desc "tool to create PDF grade sheets")
 (define version "0.0")
