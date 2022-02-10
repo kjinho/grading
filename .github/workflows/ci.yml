@@ -2,12 +2,13 @@ on: [push, pull_request]
 name: CI
 jobs:
   build:
-    name: "Build on Racket '${{ matrix.racket-version }}' (${{ matrix.racket-variant }})"
-    runs-on: ubuntu-latest
+    name: "Build on Racket '${{ matrix.racket-version }}' (${{ matrix.racket-variant }}) (${{ matrix.os }})"
+    runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental || false }}
     strategy:
       fail-fast: false
       matrix:
+        os: ["ubuntu-latest", "macOS-latest", "windows-latest"]
         racket-version: ["stable", "current"]
         racket-variant: ["BC", "CS"]
         include:
