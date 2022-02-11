@@ -20,6 +20,17 @@
          (only-in racket/system
                   system*))
 
+(provide overwrite-flag
+         pdflatex-command
+         accumulate-scores
+         calculate-grades
+         latexify-student
+         latexify-to-file
+         render-grade-list
+         save-total-scores!
+         get-student-names
+         process-name!)         
+
 (define (mean xs)
   (let loop ((xs xs)
              (acc 0)
@@ -70,20 +81,21 @@
   (let* ((grades (hash-ref yaml "grades"))
          (grade-list (hash-map grades (lambda (k v) `(,k ,@v)))))
     (map (lambda (x)
-           `(,(car x)
-             ,(~>>
-               (cdr x)
-               (map hash-values)
-               (apply append)
-               (filter list?)
-               (apply append)
-               (map (lambda (y) (car (hash-values y))))
-               (filter number?)
-               (apply +))))
+           (cons
+            (car x)
+            (~>>
+             (cdr x)
+             (map hash-values)
+             (apply append)
+             (filter list?)
+             (apply append)
+             (map (lambda (y) (car (hash-values y))))
+             (filter number?)
+             (apply +))))
          grade-list)))
 
 (define (calculate-stddev acc-scores)
-  (stddev (map (lambda (x) (cadr x)) acc-scores)))
+  (stddev (map (lambda (x) (cdr x)) acc-scores)))
 
 (define (deviations-from-mean->grade num)
   (cond ((< num -6)
@@ -110,12 +122,12 @@
 ;; - 'deviations
 (define (calculate-grades acc-scores)
   (let ((stddevs (calculate-stddev acc-scores))
-        (avg-score (mean (map (lambda (x) (cadr x)) acc-scores)))
+        (avg-score (mean (map (lambda (x) (cdr x)) acc-scores)))
         )
     (make-hash
      (map (lambda (x)
             (let* ((name (car x))
-                   (score (cadr x))
+                   (score (cdr x))
                    (deviations-from-mean (/ (- score avg-score)
                                             stddevs))
                    (grade (deviations-from-mean->grade
@@ -204,10 +216,10 @@ Grade: & " (symbol->string (hash-ref grades 'grade)) "\\\\
 \\end{document}"
      )))
 
-(define (latexify-to-file name
-                          yaml
+(define (latexify-to-file yaml
+                          name
                           #:exists (exists-flag (overwrite-flag))
-                          #:filename (filename (string-append name ".tex")))
+                          #:filename (filename (path-add-extension name "tex")))
   (let ((latex-contents (latexify-student yaml name)))
     (display-to-file latex-contents
                      filename
@@ -218,14 +230,14 @@ Grade: & " (symbol->string (hash-ref grades 'grade)) "\\\\
 ;; given a yaml and name, generates the PDF and cleans up
 (define (process-name! yaml name)
   (let* ((pname (string-replace name " " "_"))
-         (texname (string-append pname ".tex"))
-         (auxfiles (map (lambda (x) (string-append pname x))
-                        '(".log" ".aux"))))
+         (texname (path-add-extension pname "tex"))
+         (auxfiles (map (lambda (x) (path-add-extension pname x))
+                        '("log" "aux"))))
     (begin
-      (latexify-to-file name yaml #:filename texname)
+      (latexify-to-file yaml name #:filename texname)
       (system* (pdflatex-command) texname)
-      (for ((del-file-name (cons texname auxfiles)))
-        (delete-file del-file-name)))))
+      (for ((del-file-names (cons texname auxfiles)))
+        (delete-file del-file-names)))))
 
 (define (get-student-names yaml)
   (~> (hash-ref yaml "grades")
