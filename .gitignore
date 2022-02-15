@@ -4,3 +4,8 @@
 .DS_Store
 compiled/
 /doc/
+grading
+/dist/
+*.css
+*.js
+*.html

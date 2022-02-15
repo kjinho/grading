@@ -219,7 +219,7 @@ Grade: & " (symbol->string (hash-ref grades 'grade)) "\\\\
 (define (latexify-to-file yaml
                           name
                           #:exists (exists-flag (overwrite-flag))
-                          #:filename (filename (path-add-extension name "tex")))
+                          #:filename (filename (path-add-extension name ".tex")))
   (let ((latex-contents (latexify-student yaml name)))
     (display-to-file latex-contents
                      filename
@@ -230,9 +230,9 @@ Grade: & " (symbol->string (hash-ref grades 'grade)) "\\\\
 ;; given a yaml and name, generates the PDF and cleans up
 (define (process-name! yaml name)
   (let* ((pname (string-replace name " " "_"))
-         (texname (path-add-extension pname "tex"))
+         (texname (path-add-extension pname ".tex"))
          (auxfiles (map (lambda (x) (path-add-extension pname x))
-                        '("log" "aux"))))
+                        '(".log" ".aux"))))
     (begin
       (latexify-to-file yaml name #:filename texname)
       (system* (pdflatex-command) texname)
